@@ -44,15 +44,15 @@ switch ($f_ext) {
 		exit;
 }
 
-// construct a usable file path
+// construct usable file path
 $f_path = "./cache/{$f_name}{$f_ext}";
 
-// check for a cached copy of the file
+// check the local cache
 if (file_exists($f_path)) {
 	// get last modified time
 	$f_modified = filemtime($f_path);
 	
-	// check for a valid client cache
+	// validate the client cache
 	if (isset(    $_SERVER['HTTP_IF_MODIFIED_SINCE']) && 
 	   (strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $f_modified)
 	) {
