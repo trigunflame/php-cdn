@@ -1,0 +1,50 @@
+/* 
+ * some client code for using php socket/streams instead of curl
+ * - note: it has *not* been tested in any way whatsoever, i had 
+ * - planned on using it eventually, but didn't get around to it
+ *
+	// issue an http *HEAD* request 
+	// to verify that the image exists
+	stream_context_set_default(array('http' => array('method' => 'HEAD')));
+		
+	// we have located the remote file
+	if (($headers = @get_headers($f_origin . $_SERVER['REQUEST_URI'])) !== false &&
+	     strpos($headers[0], '200') !== false
+	) {
+		$fp = fopen($f_path, 'a+b');
+		if(flock($fp, LOCK_EX | LOCK_NB)) {
+			// empty *possible* contents
+			ftruncate($fp, 0);
+			rewind($fp);
+				
+			// issue an http *GET* request
+			stream_context_set_default(array('http' => array('method' => 'GET')));
+				
+			// make sure that we retrieved the 
+			// intended file instead of an error message
+			if (($stream = @fopen($f_origin . $_SERVER['REQUEST_URI'], 'rb')) !== false && 
+				($data = @stream_get_contents($stream)) !== false
+			) {
+				// write to file
+				fwrite($fp, $data);
+			}
+					
+			// 1) flush the output to the file
+			// 2) and release the secondary lock
+			// 3) close the opened php socket/stream
+			fflush($fp);
+			flock($fp, LOCK_UN);
+			@fclose($stream);
+		}
+			
+		// close the file
+		fclose($fp);
+						
+		// issue *302* for *this* request
+		header('Location: ' . $f_origin . $_SERVER['REQUEST_URI']);
+	} else {
+		// the file doesn't exist, issue *404*
+		header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
+		header('Cache-Control: private');
+	}
+ */
