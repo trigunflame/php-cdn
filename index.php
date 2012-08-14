@@ -16,7 +16,7 @@
 $f_expires = 86400;
 
 // the source that we intend to mirror
-$f_origin = 'http://natsel.darktech.org';
+$f_origin = 'http://cdn.com';
 
 // encode as filename-safe base64
 $f_name = strtr(base64_encode($_SERVER['REQUEST_URI']), '+/=', '-_,');
