@@ -70,8 +70,8 @@ if (file_exists($f_path)) {
 		readfile($f_path);
 	}
 } else {
-	// issue an http *HEAD* request 
-	// to verify that the image exists
+	// http *HEAD* request 
+	// verify that the image exists
 	$ch = curl_init();
 	curl_setopt_array($ch, 	array(
 		CURLOPT_URL            => $f_origin . $_SERVER['REQUEST_URI'],
@@ -82,8 +82,6 @@ if (file_exists($f_path)) {
 		CURLOPT_BINARYTRANSFER => 1,
 		CURLOPT_HEADER         => 0,
 		CURLOPT_NOBODY         => 1,
-		// enable if you're not using
-		// safe_mode or open_basedir
 		// CURLOPT_FOLLOWLOCATION => 1, 
 	));
 	
@@ -95,7 +93,7 @@ if (file_exists($f_path)) {
 			ftruncate($fp, 0);
 			rewind($fp);
 
-			// issue an http *GET* request
+			// http *GET* request
 			// and write directly to the file
 			$ch2 = curl_init();
 			curl_setopt_array($ch2, 	array(
@@ -107,20 +105,19 @@ if (file_exists($f_path)) {
 				CURLOPT_BINARYTRANSFER => 1,
 				CURLOPT_HEADER         => 0,
 				CURLOPT_FILE           => $fp
-				// enable if you're not using
-				// safe_mode or open_basedir
 				// CURLOPT_FOLLOWLOCATION => 1, 
 			));
 				
-			// make sure that we retrieved the 
-			// intended file instead of an error message
-			if (curl_exec($ch2) === false) { 
+			// did the transfer complete?
+			if (curl_exec($ch2) === false) {
+				// something went wrong, null 
+				// the file just in case >.>
 				ftruncate($fp, 0); 
 			}
 				
-			// 1) flush the output to the file
-			// 2) and release the secondary lock
-			// 3) close the opened curl socket
+			// 1) flush output to the file
+			// 2) release the file lock
+			// 3) release the curl socket
 			fflush($fp);
 			flock($fp, LOCK_UN);
 			curl_close($ch2);
@@ -137,7 +134,7 @@ if (file_exists($f_path)) {
 		header('Cache-Control: private');
 	}
 	
-	// clean up
+	// finished
 	curl_close($ch);
 }
 
